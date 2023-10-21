@@ -106,6 +106,39 @@ app.delete('/student/:_id' , async(req,res) => {
 
 //update  one data PUT
 
+app.put('/student/:_id' , async (req , res)=>{
+
+    const { _id } = req.params
+
+    const {name,age} = req.body
+
+    if(!name)
+    {
+        return res.json({
+            maesage:"name is required"
+        })
+    }
+
+    if(!age)
+    {
+        return res.json({
+            maesage:"age is required"
+        })
+    }
+
+   await Student.updateOne({ _id :_id} , {$set :{
+        name:name,
+        age:age
+    }})
+
+    const updatedata =  await Student.findOne({ _id :_id })
+
+    res.json({
+        message:"update data ",
+        data :updatedata
+    })
+})
+
 
 
 app.listen(PORT, () => {
