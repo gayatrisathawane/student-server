@@ -139,7 +139,35 @@ app.put('/student/:_id' , async (req , res)=>{
     })
 })
 
+//update with patch 
 
+app.patch('/student/:_id', async(req,res)=>{
+    const {_id } = req.params;
+
+    const{name,age}= req.body;
+
+    const findOneStudent = await Student.findById(_id);
+
+    if(name)
+    {
+        findOneStudent.name=name
+    }
+    if(age)
+    {
+        findOneStudent.age=age
+    }
+
+
+    const  saved = await findOneStudent.save()
+
+    res.json({
+
+        data : saved,
+        message:"uccessfully updataed"
+    }
+    )
+
+})
 
 app.listen(PORT, () => {
     console.log("port running")
