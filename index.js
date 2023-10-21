@@ -1,4 +1,5 @@
-import express from 'express';
+import express, { query } from 'express';
+import mongoose ,{model ,Schema} from 'mongoose';
 
 const app = express();
 
@@ -6,19 +7,46 @@ const PORT = 8080;
 
 app.use(express.json())
 
-const students = []
-app.get('/students', (req, res) => {
+const MONGODB_URL= 'mongodb+srv://gayatrisathawane:gayatri123@cluster0.cqdx7ze.mongodb.net/Cluster0'
+
+
+const connectMongoDb = async () => {
+
+    const conn = await mongoose.connect(MONGODB_URL)
+    console.log("mongo db connect")
+
+}
+connectMongoDb()
+
+
+const StudentSchema = new Schema({
+   name:String,
+   age:Number
+
+})
+const Student = model('Student',StudentSchema)
+
+
+
+
+
+
+
+
+app.get('/students', async(req, res) => {
+
+    const savedDocuments = await Student.find();
     res.json(
         {
             status: true,
-            data: students,
+            data: savedDocuments,
             message: "successfull fetch dada  "
         })
 
 })
 
-app.post('/addstudent', (req, res) => {
-    const id = Math.floor(Math.random() * 100) + 1
+app.post('/addstudent', async (req, res) => {
+
     const { name, age } = req.body
 
     if (!name) {
@@ -32,49 +60,51 @@ app.post('/addstudent', (req, res) => {
         })
     }
 
-    const obj = {
-        id: id,
-        name: name,
-        age: age
-    }
+      const studentobj = new Student({
+        name:name,
+        age:age
+      })
+        
+      const saveStudentData  = await studentobj.save()
 
-    students.push(obj)
-
-    res.send(
+    res.json(
         {
-            data: students,
+            data: saveStudentData,
             message: "added daa"
         }
     )
 
 })
 
-app.get('/student', (req, res) => {
+app.get('/student', async(req, res) => {
 
-    let student = null
-
-    const { id } = req.query;
-    students.forEach((stud) => {
-        if(stud.id == id) {
-            student = stud
-        }
-    })
-
-    if (student == null) {
-        return res.json({
-            message: "not found"
-        })
-    }
+  
+       const { _id } = req.query
+       const getdata = await Student.findOne({_id:_id})
+    
 
     res.json({
 
-        data: student,
+        data:getdata ,
         status: "successfully fetch"
     })
 
 })
 
+// delete data by id 
+app.delete('/student/:_id' , async(req,res) => {
 
+    const { _id } = req.params ;
+
+    await Student.deleteOne({ _id : _id })
+
+    res.json(
+        {
+            message: `delete data ${ _id }`
+        })
+    })
+
+//update  one data PUT
 
 
 
